@@ -1,5 +1,5 @@
 # Start with empty ubuntu machine
-FROM ubuntu:15.04
+FROM ubuntu:18.04
 
 MAINTAINER Autolab Development Team "autolab-dev@andrew.cmu.edu"
 
@@ -15,7 +15,8 @@ WORKDIR /opt/TangoService/Tango
 RUN mkdir -p volumes
 
 WORKDIR /opt
-
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=America/Chicago
 # Install dependancies
 RUN apt-get update && apt-get install -y \
 	nginx \
@@ -46,19 +47,12 @@ WORKDIR /opt/TangoService/Tango/
 # Install Docker from Docker Inc. repositories.
 RUN curl -sSL https://get.docker.com/ | sh
 
-# Install the magic wrapper.
-ADD ./wrapdocker /usr/local/bin/wrapdocker
-RUN chmod +x /usr/local/bin/wrapdocker
-
-# Define additional metadata for our image.
-VOLUME /var/lib/docker
-
 # Create virtualenv to link dependancies
 RUN pip install virtualenv && virtualenv .
 # Install python dependancies
 RUN pip install -r requirements.txt
 
-RUN mkdir -p /var/log/docker /var/log/supervisor
+RUN mkdir -p /var/log/supervisor
 
 # Move custom config file to proper location
 RUN cp /opt/TangoService/Tango/deployment/config/nginx.conf /etc/nginx/nginx.conf
